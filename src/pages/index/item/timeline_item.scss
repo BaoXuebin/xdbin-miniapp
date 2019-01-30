@@ -1,4 +1,6 @@
-@left-width: 120rpx;
+// @import "~taro-ui/dist/style/components/flex.scss";
+
+$left-width: 120rpx;
 
 .timeline-item {
   position: relative;
@@ -6,7 +8,7 @@
 }
 .timeline-item-tail {
   position: absolute;
-  left: @left-width;
+  left: $left-width;
   top: 14rpx;
   height: 100%;
   border-left: 2px solid #e8e8e8;
@@ -17,13 +19,13 @@
 .time-line-date {
   float: left;
   text-align: center;
-  width: @left-width - 10;
+  width: $left-width - 10;
   position: relative;
   line-height: 1;
 }
 .timeline-item-head {
   position: absolute;
-  left: @left-width - 6;
+  left: $left-width - 6;
   width: 13px;
   height: 13px;
   margin-top: 12rpx;
@@ -38,7 +40,7 @@
 .timeline-item-content {
   min-height: 120rpx;
   // width: 100%;
-  margin-left: @left-width + 30;
+  margin-left: $left-width + 30;
   margin-right: 20rpx;
   padding-bottom: 40rpx;
   position: relative;
@@ -52,9 +54,9 @@
 }
 .month {
   display: block;
-  font-size: 22rpx;
+  font-size: 24rpx;
 }
-.image-container {
+.content-container {
   margin-top: 10rpx;
 }
 image.thumbnail {
@@ -62,5 +64,9 @@ image.thumbnail {
   max-width: 120rpx;
   height: 120rpx;
   object-fit: cover;
-  margin: 10rpx;
+  margin-right: 16rpx;
+}
+.meta-text {
+  font-size: 24rpx;
+  color: gray;
 }

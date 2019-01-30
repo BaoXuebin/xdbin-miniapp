@@ -1,5 +1,5 @@
 const config = {
-  projectName: 'xdbin',
+  projectName: 'xdbin-miniapp',
   date: '2019-1-29',
   designWidth: 750,
   deviceRatio: {
@@ -68,6 +68,7 @@ const config = {
   h5: {
     publicPath: '/',
     staticDirectory: 'static',
+    esnextModules: ['taro-ui'],
     module: {
       postcss: {
         autoprefixer: {
