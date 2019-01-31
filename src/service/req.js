@@ -18,7 +18,7 @@ export const fetch = (url, data = {}, header) => {
   // 默认 header
   const _defaultHeaders = {
     'content-type': 'application/json',
-    'auth': 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJCYW9YdWViaW4iLCJjcmVhdGVkIjoxNTQ4OTI2OTAxODE2LCJleHAiOjE1NDg5MzA1MDF9.myKq7wB26DyRvbiaYD51vnXOcRu3pPMnpxqLRsOf2X4'
+    'auth': 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJCYW9YdWViaW4iLCJjcmVhdGVkIjoxNTQ4OTQ4ODQ1NTE5LCJleHAiOjE1NDg5NTI0NDV9.PLQPcJT09ybm9xsfWQURivKs2_SIGhV5uL6gh4-oloQ'
   };
   _header = Object.assign({}, _defaultHeaders, header);
   return new Promise((resolve, reject) => {
@@ -32,6 +32,11 @@ export const fetch = (url, data = {}, header) => {
           const { code } = data;
           switch (code) {
             case 401:
+              try {
+                Taro.atMessage({ 'message': '登录身份过期', 'type': 'error', });
+              } catch (error) {
+                console.error(error);
+              }
               reject(data);
               break;
             default:

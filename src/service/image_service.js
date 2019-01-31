@@ -1,22 +1,27 @@
 import { fetch } from './req';
 import * as qiniu from 'qiniu-js';
 
-export const fetchQiniuToken = type => fetch(`https://xdbin.com/api/v1/qiniu/token?type=${type}`);
-export const upload = file => new Promise((resolve) => {
-  fetchQiniuToken()
-    .then((res) => {
-      const { key, token } = res;
-      console.log(qiniu);
-      const observable = qiniu.upload(
-        file,
-        key,
-        token,
-        { region: qiniu.region.z0 }
-      );
-      observable.subscribe({
-        complete(res) {
-          resolve(res);
-        }
-      });
-    });
-})
+const qiniuUploader = require('./qiniuUploader');
+
+const fetchQiniuToken = type => fetch(`https://xdbin.com/api/v1/qiniu/token?type=${type}`);
+export const upload = async ({ files, success, error, progress }) => {
+    console.log(files);
+    const res = await fetchQiniuToken('video');
+    if (files && files.length > 0) {
+        files.forEach((file) => {
+            if (!res) return;
+            const { key, token } = res;
+            qiniuUploader.upload(
+                file.url,
+                success, error,
+                {
+                    region: 'ECN',
+                    domain: 'bzkdlkaf.bkt.clouddn.com',
+                    key,
+                    uptoken: token
+                },
+                progress
+            );
+        });
+    }
+}

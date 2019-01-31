@@ -1,6 +1,7 @@
 import '@tarojs/async-await'
 import Taro, { Component } from '@tarojs/taro'
 import { Provider } from '@tarojs/redux'
+import { AtMessage } from 'taro-ui'
 
 import Index from './pages/index'
 import Record from './pages/record/record'
@@ -17,8 +18,8 @@ class App extends Component {
 
   config = {
     pages: [
+      // 'pages/index/index',
       'pages/record/record',
-      'pages/index/index',
       'pages/welcome/welcome'
     ],
     window: {
