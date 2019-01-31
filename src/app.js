@@ -3,7 +3,7 @@ import Taro, { Component } from '@tarojs/taro'
 import { Provider } from '@tarojs/redux'
 
 import Index from './pages/index'
-import Record from './pages/record/index'
+import Record from './pages/record/record'
 import Welcome from './pages/welcome/welcome'
 
 import configStore from './store'
@@ -17,9 +17,9 @@ class App extends Component {
 
   config = {
     pages: [
+      'pages/record/record',
       'pages/index/index',
-      'pages/welcome/welcome',
-      'pages/record/index',
+      'pages/welcome/welcome'
     ],
     window: {
       backgroundTextStyle: 'light',
