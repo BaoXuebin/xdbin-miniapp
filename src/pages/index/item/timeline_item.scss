@@ -16,12 +16,30 @@ $left-width: 100rpx;
 .timeline-item-last .timeline-item-tail {
   display: none;
 }
-.time-line-date {
-  float: left;
+
+// layout
+.timeline-item-layout {
+  display: flex;
+}
+.timeline-item-left {
+  display: flex;
+  flex-direction: column;
+  width: 110rpx;
+}
+.timeline-item-left-1 {
+  width: 100%;
+}
+.timeline-item-left-2 {
   text-align: center;
-  width: $left-width - 10;
-  position: relative;
-  line-height: 1;
+  width: 100%;
+}
+.timeline-item-right {
+  width: 100%;
+}
+
+.time-line-date {
+  text-align: center;
+  line-height: 40rpx;
 }
 .timeline-item-head {
   position: absolute;
@@ -38,16 +56,32 @@ $left-width: 100rpx;
   color: #1da57a;
 }
 .timeline-item-content {
+  display: flex;
   min-height: 120rpx;
-  // width: 100%;
   color: black;
-  margin-left: $left-width + 30;
+  margin-left: 30rpx;
   margin-right: 20rpx;
   padding-bottom: 40rpx;
-  font-size: rpx;
+  font-size: 28rpx;
   position: relative;
 }
-
+.left-container {
+  width: $left-width;
+  text-align: center;
+}
+.timeline-item-author {
+  color: #1da57a;
+  margin-bottom: 10rpx;
+  font-weight: bold;
+}
+.timeline-item-avatar {
+  width: 68rpx;
+  height: 68rpx;
+  display: inline-block;
+  text-align: center;
+  border-radius: 34rpx;
+  overflow: hidden;
+}
 .day {
   display: block;
   font-weight: bold;
@@ -63,8 +97,7 @@ $left-width: 100rpx;
   margin-top: 10rpx;
 }
 image.thumbnail {
-  width: 100%;
-  max-width: 120rpx;
+  width: 120rpx;
   height: 120rpx;
   object-fit: cover;
   margin-right: 16rpx;
