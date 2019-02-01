@@ -9,8 +9,7 @@ import Welcome from './pages/welcome/welcome'
 
 import configStore from './store'
 
-import 'taro-ui/dist/style/index.scss'
-import './app.css'
+import './app.scss'
 
 const store = configStore()
 
@@ -18,7 +17,7 @@ class App extends Component {
 
   config = {
     pages: [
-      // 'pages/index/index',
+      'pages/index/index',
       'pages/record/record',
       'pages/welcome/welcome'
     ],

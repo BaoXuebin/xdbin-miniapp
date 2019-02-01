@@ -2,7 +2,7 @@ import Taro, { Component } from '@tarojs/taro'
 import { View } from '@tarojs/components'
 import { AtTextarea, AtImagePicker, AtButton, AtMessage } from 'taro-ui'
 
-import { upload } from '../../service/image_service';
+import { upload, fetchQiniuToken } from '../../service/image_service';
 
 import './record.scss'
 
@@ -23,12 +23,13 @@ class Record extends Component {
         };
     }
 
-    handleUploadImage(files) {
+    handleUploadImage(file, token) {
         const _this = this;
-        upload({
-            files,
+        return upload({
+            token,
+            file,
             success: (res) => {
-                console.log(res);
+                console.log(`${file.url} upload success`);
                 this.setState({
                     filePaths: _this.state.filePaths.concat([res.url])
                 });
@@ -39,6 +40,7 @@ class Record extends Component {
             },
             progress: (res) => {
                 // progress, totalBytesSent, totalBytesExpectedToSend
+                // console.log(res);
                 _this.setState({
                     progress: res.progress
                 });
@@ -46,11 +48,16 @@ class Record extends Component {
         });
     }
 
-    handlePublish() {
+    async handlePublish() {
         const { value, files } = this.state;
+        // 图片上次七牛云
         this.setState({ uploading: true });
-        this.handleUploadImage(files);
-        console.log(value, this.state.filePaths);
+        const res = await fetchQiniuToken('foods');
+        for (let file of files) {
+            console.log(`${file.url} upload start`);
+            await this.handleUploadImage(file, res.token);
+            console.log(`${file.url} upload end`);
+        }
         this.setState({ uploading: false, files: [], value: '' });
     };
 

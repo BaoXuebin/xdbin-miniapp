@@ -2,12 +2,15 @@ import Taro, { Component } from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 import monment from 'moment';
 
-import 'taro-ui/dist/style/components/flex.scss'
 import './timeline_item.scss';
 class TimelineItem extends Component {
 
-    readImage(e) {
-        const idx = e.target.dataset.eReadimageAA;
+    readImage(event) {
+        console.log(event);
+        let idx = event;
+        if (typeof idx !== 'number') {
+            idx = event.target.dataset.eReadimageAA;
+        }
         const { images } = this.props.body;
         wx.previewImage({
             current: images[idx],
@@ -37,9 +40,13 @@ class TimelineItem extends Component {
                                 ))}
                             </View>
                         }
-                        <View className='at-row meta-text'>
-                            <View className='at-col'>{monment(publishTime).format('HH:mm')}</View>
-                            <View className='at-col' style={{ textAlign: 'right' }}>{images ? `共${images.length}张` : ''}</View>
+                        <View className="meta-container">
+                            <View className="meta-time">
+                                {monment(publishTime).format('HH:mm')}
+                            </View>
+                            <View className="meta-img-num">
+                                {images ? `共${images.length}张` : ''}
+                            </View>
                         </View>
                     </View>
                 </View>

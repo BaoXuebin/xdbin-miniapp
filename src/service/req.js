@@ -18,7 +18,7 @@ export const fetch = (url, data = {}, header) => {
   // 默认 header
   const _defaultHeaders = {
     'content-type': 'application/json',
-    'auth': 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJCYW9YdWViaW4iLCJjcmVhdGVkIjoxNTQ4OTQ4ODQ1NTE5LCJleHAiOjE1NDg5NTI0NDV9.PLQPcJT09ybm9xsfWQURivKs2_SIGhV5uL6gh4-oloQ'
+    'auth': 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJCYW9YdWViaW4iLCJjcmVhdGVkIjoxNTQ4OTg1OTkyODk4LCJleHAiOjE1NDg5ODk1OTJ9.nG9QIQFBjTjk4DI3IG6eIyb6RY2nF8czPjV38S8lZlA'
   };
   _header = Object.assign({}, _defaultHeaders, header);
   return new Promise((resolve, reject) => {
