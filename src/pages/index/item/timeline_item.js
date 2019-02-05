@@ -52,7 +52,7 @@ class TimelineItem extends Component {
             <View className="timeline-item-right">
               <View key={note.key} className="timeline-item-content">
                 <View>
-                  <View className="timeline-item-author">包学斌</View>
+                  <View className="timeline-item-author">{note.nickName || 'Unknown'}</View>
                   {note.content}
                   <View className="content-container">
                     {note.images && note.images.length > 0 && (

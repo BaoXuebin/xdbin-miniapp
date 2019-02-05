@@ -8,6 +8,7 @@ import {
   AtForm,
   AtSwitch
 } from "taro-ui";
+import moment from 'moment';
 
 import { upload, fetchQiniuToken } from "../../service/image_service";
 
@@ -31,12 +32,13 @@ class Record extends Component {
     };
   }
 
-  handleUploadImage(file, token) {
+  handleUploadImage(file, filePath, token) {
     const _this = this;
     return new Promise((resolve, reject) => {
       upload({
         token,
         file,
+        filePath,
         success: res => {
           resolve(res);
         },
@@ -64,8 +66,10 @@ class Record extends Component {
     this.setState({ uploading: true });
     let filePaths = [];
     const res = await fetchQiniuToken("foods");
-    for (let file of files) {
-      await this.handleUploadImage(file, res.token)
+    const now = moment().format('YYYYMMDD_HHmmss');
+    for (let idx in files) {
+      const filePath = `${now}/${idx}/`;
+      await this.handleUploadImage(files[idx], filePath, res.token)
         .then(result => {
           filePaths = this.state.filePaths.concat([result.imageURL]);
           this.setState({

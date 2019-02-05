@@ -1,12 +1,12 @@
 import Taro, { Component } from "@tarojs/taro";
-import { View } from "@tarojs/components";
-import { AtTabBar } from "taro-ui";
+import { View, Button } from "@tarojs/components";
+import { AtIcon, AtButton, AtMessage } from "taro-ui";
 import moment from 'moment';
 
 import "./index.css";
 import TimelineItem from "./item/timeline_item";
 import { fetchPubNotes } from "../../service/note_service";
-import { collect } from '../../service/user_service';
+import { login, collect } from '../../service/user_service';
 
 class Index extends Component {
   config = {
@@ -58,21 +58,27 @@ class Index extends Component {
   }
 
   componentWillMount() {
-    this.handleFetchPubNotes();
-  }
-
-  componentDidMount() {
-    
+    Taro.login()
+      .then(res => login(res.code))
+      .then((res) => {
+        if (res.status >= 400) {
+          console.error(res.message);
+          Taro.atMessage({ type: 'error', message: '登录失败' });
+        }
+        const { token } = res;
+        Taro.setStorageSync('token', token);
+        this.handleFetchPubNotes();
+      })
+      .catch((error) => {
+        console.error(error);
+        Taro.atMessage({ type: 'error', message: '登录失败' });
+      });
   }
 
   onPullDownRefresh() {
     this.handleFetchPubNotes(() => {
       Taro.stopPullDownRefresh();
     });
-  }
-
-  onPageScroll() {
-    
   }
 
   buildNoteTimeLineData(rawNotes) {
@@ -85,18 +91,23 @@ class Index extends Component {
       if (days.indexOf(key) < 0) {
         const dayNote = { key, month, day, notes: [], fixed: false };
         days.push(key);
-        notes.unshift(dayNote);
+        notes.push(dayNote);
       }
       const dayNote = notes.filter(n => n.key === key)[0];
-      const { id, content, images, publishTime } = note;
-      dayNote.notes.unshift({
-        key: id, content, images, publishTime
+      const { id, content, images, publishTime, nickName, avatarUrl } = note;
+      dayNote.notes.push({
+        key: id, content, images, publishTime, nickName, avatarUrl
       });
     });
     return notes;
   }
 
-  handleNavigateRecord() {
+  handleNavigateRecord(event) {
+    const { userInfo } = event.detail;
+    if (!userInfo) {
+      Taro.atMessage({ type: 'warning', message: '请先同意授权获取微信用户信息' });
+      return;
+    }
     Taro.getUserInfo()
       .then(res => collect({ nickName: res.userInfo.nickName, avatarUrl: res.userInfo.avatarUrl }))
       .then(() => {
@@ -111,6 +122,7 @@ class Index extends Component {
     const { notes } = this.state;
     return (
       <View style={{ marginBottom: "80rpx" }}>
+        <AtMessage />
         <View class="container nopadding" id="ssss">
           <View class="timeline">
             {notes && notes.map((note, index) => (
@@ -123,13 +135,14 @@ class Index extends Component {
             ))}
           </View>
         </View>
-        <AtTabBar
-          fixed
-          color="#1da57a"
-          open-type="getUserInfo"
-          tabList={[{ iconType: "camera" }]}
-          onClick={this.handleNavigateRecord.bind(this)}
-        />
+        <AtButton
+          full
+          className="publish-btn"
+          openType="getUserInfo"
+          onGetUserInfo={this.handleNavigateRecord}
+        >
+          <AtIcon value="camera" size="25" color="#1da57a"></AtIcon>
+        </AtButton>
       </View>
     );
   }

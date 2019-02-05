@@ -20,7 +20,7 @@ class App extends Component {
 
   config = {
     pages: [
-      'pages/welcome/welcome',
+      // 'pages/welcome/welcome',
       'pages/index/index',
       'pages/record/record'
     ],

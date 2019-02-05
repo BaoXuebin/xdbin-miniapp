@@ -40,6 +40,7 @@ class Welcome extends Component {
     return (
       <View>
         <AtMessage />
+        <Text>唯爱与美食不可辜负</Text>
       </View>
     )
   }
