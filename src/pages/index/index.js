@@ -1,118 +1,138 @@
-import Taro, { Component } from '@tarojs/taro'
-import { View } from '@tarojs/components'
-import { AtTabBar } from 'taro-ui'
+import Taro, { Component } from "@tarojs/taro";
+import { View } from "@tarojs/components";
+import { AtTabBar } from "taro-ui";
+import moment from 'moment';
 
-import './index.css'
-import TimelineItem from './item/timeline_item';
+import "./index.css";
+import TimelineItem from "./item/timeline_item";
+import { fetchPubNotes } from "../../service/note_service";
+import { collect } from '../../service/user_service';
 
 class Index extends Component {
+  config = {
+    navigationBarTitleText: "美食手记",
+    enablePullDownRefresh: true
+  };
 
-    config = {
-        navigationBarTitleText: '美食手记'
+  state = {
+    loading: false,
+    pageNo: 1,
+    pageSize: 20,
+    last: false,
+    rawNotes: [],
+    notes: []
+  };
+
+  handleFetchPubNotes(callback) {
+    if (this.state.loading) {
+      return;
     }
+    // 页面加载完毕，请求新的手记列表
+    this.setState({ loading: true });
+    Taro.showNavigationBarLoading();
 
-    state = {
-        notes: [
-            {
-                key: '1',
-                day: '27',
-                month: '一月',
-                notes: [
-                    {
-                        key: 'note_1',
-                        content: '必胜客吃披萨',
-                        images: [
-                            'http://cdn.xdbin.com/foods/tmp_186c956716919ac75d1b1e5901e031d4bee68e38e404b625.jpg',
-                            'http://cdn.xdbin.com/foods/tmp_654a0de06c3dbe27f4fe660ae8f99e3371a505f04ce43ee4.jpg',
-                            'http://cdn.xdbin.com/foods/tmp_a1219f6050ab60ddcaa637bf11cbc78802d5afe22479854f.jpg',
-                            'http://cdn.xdbin.com/foods/tmp_b07481e2621617ca3ebd4c8f1b49139f32c4c0ed977b667d.jpg'
-                        ],
-                        publishTime: new Date()
-                    },
-                    {
-                        key: 'note_2',
-                        content: '必胜客吃披萨',
-                        images: [
-                            'http://cdn.xdbin.com/foods/tmp_186c956716919ac75d1b1e5901e031d4bee68e38e404b625.jpg',
-                            'http://cdn.xdbin.com/foods/tmp_654a0de06c3dbe27f4fe660ae8f99e3371a505f04ce43ee4.jpg',
-                            'http://cdn.xdbin.com/foods/tmp_a1219f6050ab60ddcaa637bf11cbc78802d5afe22479854f.jpg',
-                            'http://cdn.xdbin.com/foods/tmp_b07481e2621617ca3ebd4c8f1b49139f32c4c0ed977b667d.jpg'
-                        ],
-                        publishTime: new Date()
-                    },
-                ]
-            },
-            {
-                key: '2',
-                day: '08',
-                month: '一月',
-                notes: [
-                    {
-                        key: 'note_1',
-                        content: '伊曼努尔·康德，著名德意志哲学家，德国古典哲学创始人，启蒙运动时期最重要的思想家之一。生于东普鲁士哥尼斯堡（今俄罗斯加里宁格勒）。哥尼斯堡大学毕业。1755年起在母校执教，1770年升教授。其思想分为“前批判时期”和“批判时期”。在前批判时期，以自然科学的研究为主，并进行哲学探究。1755年发表《自然通史和天体论》，提出关于太阳系起源的星云假说。其学说深深影响近代西方哲学，并开启了德国唯心主义和康德主义等诸多流派。',
-                        images: [
-                            'http://cdn.xdbin.com/pics/20190122214909'
-                        ],
-                        publishTime: new Date()
-                    },
-                    {
-                        key: 'note_2',
-                        content: '伊曼努尔·康德，著名德意志哲学家，德国古典哲学创始人，启蒙运动时期最重要的思想家之一。生于东普鲁士哥尼斯堡（今俄罗斯加里宁格勒）。哥尼斯堡大学毕业。1755年起在母校执教，1770年升教授。其思想分为“前批判时期”和“批判时期”。在前批判时期，以自然科学的研究为主，并进行哲学探究。1755年发表《自然通史和天体论》，提出关于太阳系起源的星云假说。其学说深深影响近代西方哲学，并开启了德国唯心主义和康德主义等诸多流派。',
-                        images: [
-                            'http://cdn.xdbin.com/pics/20190122214909'
-                        ],
-                        publishTime: new Date()
-                    }
-                ],
-                publishTime: new Date()
-            },
-            {
-                key: '3',
-                day: '23',
-                month: '十二',
-                notes: [
-                    {
-                        key: 'note_1',
-                        content: '伊曼努尔·康德，著名德意志哲学家',
-                        images: [
-                            'http://cdn.xdbin.com/foods/tmp_a1219f6050ab60ddcaa637bf11cbc78802d5afe22479854f.jpg'
-                        ],
-                        publishTime: new Date()
-                    }
-                ],
-                publishTime: new Date()
-            }
-        ]
-    };
+    const { pageSize } = this.state;
+    fetchPubNotes({ pageNo: this.state.pageNo, pageSize })
+      .then((res) => {
+        const { content, last, pageNo } = res;
+        const rawNotes = this.state.pageNo === pageNo ? content : content.concat(this.state.rawNotes);
+        this.setState({
+          last, pageNo, rawNotes,
+          loading: false,
+          notes: this.buildNoteTimeLineData(rawNotes)
+        });
+        Taro.hideNavigationBarLoading();
+        if (typeof callback === 'function') {
+          callback();
+        }
+      })
+      .catch((error) => {
+        this.setState({ loading: false });
+        console.error(error);
+        Taro.hideNavigationBarLoading();
+        if (typeof callback === 'function') {
+          callback();
+        }
+        Taro.atMessage({ type: "error", message: "获取最新数据失败" });
+      });
+  }
 
-    handleNavigateAdd() {
+  componentWillMount() {
+    this.handleFetchPubNotes();
+  }
+
+  componentDidMount() {
+    
+  }
+
+  onPullDownRefresh() {
+    this.handleFetchPubNotes(() => {
+      Taro.stopPullDownRefresh();
+    });
+  }
+
+  onPageScroll() {
+    
+  }
+
+  buildNoteTimeLineData(rawNotes) {
+    const notes = [];
+    const days = []; // set 集合
+    rawNotes.forEach((note) => {
+      const month = moment(note.publishTime).format('MMMM'); // 中文月份
+      const day = moment(note.publishTime).format('DD');
+      const key = moment(note.publishTime).format('YYYY-MM-DD');
+      if (days.indexOf(key) < 0) {
+        const dayNote = { key, month, day, notes: [], fixed: false };
+        days.push(key);
+        notes.unshift(dayNote);
+      }
+      const dayNote = notes.filter(n => n.key === key)[0];
+      const { id, content, images, publishTime } = note;
+      dayNote.notes.unshift({
+        key: id, content, images, publishTime
+      });
+    });
+    return notes;
+  }
+
+  handleNavigateRecord() {
+    Taro.getUserInfo()
+      .then(res => collect({ nickName: res.userInfo.nickName, avatarUrl: res.userInfo.avatarUrl }))
+      .then(() => {
         Taro.navigateTo({
-            url: '/pages/record/record'
-        })
-    }
+          url: "/pages/record/record"
+        });
+      })
+      .catch((error) => { console.error(error); });
+  }
 
-    render() {
-        const { notes } = this.state;
-        return (
-            <View style={{ marginBottom: '80rpx' }}>
-                <View class='container nopadding'>
-                    <View class='timeline'>
-                        {notes.map((note, index) => (
-                            <TimelineItem key={note.key} defaultProps={{}} body={note} last={index === notes.length - 1} />
-                        ))}
-                    </View>
-                </View>
-                <AtTabBar
-                    fixed
-                    color='#1da57a'
-                    tabList={[
-                        { iconType: 'camera' }
-                    ]}
-                    onClick={this.handleNavigateAdd.bind(this)}
-                />
-            </View>
-        )
-    }
+  render() {
+    const { notes } = this.state;
+    return (
+      <View style={{ marginBottom: "80rpx" }}>
+        <View class="container nopadding" id="ssss">
+          <View class="timeline">
+            {notes && notes.map((note, index) => (
+              <TimelineItem
+                key={note.key}
+                body={note}
+                last={index === notes.length - 1}
+                fixed
+              />
+            ))}
+          </View>
+        </View>
+        <AtTabBar
+          fixed
+          color="#1da57a"
+          open-type="getUserInfo"
+          tabList={[{ iconType: "camera" }]}
+          onClick={this.handleNavigateRecord.bind(this)}
+        />
+      </View>
+    );
+  }
 }
 
-export default Index
+export default Index;

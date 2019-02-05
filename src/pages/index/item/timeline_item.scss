@@ -20,6 +20,7 @@ $left-width: 100rpx;
 // layout
 .timeline-item-layout {
   display: flex;
+  position: relative;
 }
 .timeline-item-left {
   display: flex;
@@ -27,7 +28,11 @@ $left-width: 100rpx;
   width: 110rpx;
 }
 .timeline-item-left-1 {
-  width: 100%;
+  width: 110rpx;
+  text-align: left;
+}
+.fixed {
+  position: fixed;
 }
 .timeline-item-left-2 {
   text-align: center;
@@ -38,7 +43,6 @@ $left-width: 100rpx;
 }
 
 .time-line-date {
-  text-align: center;
   line-height: 40rpx;
 }
 .timeline-item-head {
@@ -87,18 +91,20 @@ $left-width: 100rpx;
   font-weight: bold;
   font-size: 52rpx;
   letter-spacing: 2px;
+  text-align: center;
 }
 .month {
   display: block;
   font-size: 24rpx;
   margin-top: 6rpx;
+  text-align: center;
 }
 .content-container {
   margin-top: 10rpx;
 }
 image.thumbnail {
-  width: 120rpx;
-  height: 120rpx;
+  width: 130rpx;
+  height: 130rpx;
   object-fit: cover;
   margin-right: 16rpx;
 }
