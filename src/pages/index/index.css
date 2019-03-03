@@ -1,7 +1,10 @@
 /*纵向时间轴*/
+page {
+  background-color: white;
+}
 .container {
   width: 100%;
-  /* background-color: bisque; */
+  background-color: white;
   padding: 0 28rpx;
 }
 .container {

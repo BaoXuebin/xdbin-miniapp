@@ -1,0 +1,65 @@
+$height: 130px;
+$color: #86BDCE;
+.todo-item-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  height: $height;
+  background-color: white;
+  // margin: 0 0 18px 0;
+  overflow: hidden;
+  box-shadow: 0 0 1px 0 $color;
+
+  .color-border {
+    width: 14px;
+    height: $height;
+    background-color: $color;
+  }
+
+  .cata-icon {
+    display: inline-block;
+    width: 160px;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: 64px 64px;
+    background-position: 30px 33px;
+  }
+
+  .content {
+    width: 100%;
+    height: $height;
+    line-height: $height;
+    font-size: 54px;
+    font-family: 'siyuan-thin';
+    font-weight: 100;
+    font-style: normal;
+  }
+}
+
+.finish {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  right: 20px;
+  background-image: url("../../assets/icons/finish.png");
+  background-repeat: no-repeat;
+  background-size: 56px 56px;
+  // background-position: 30px 33px;
+}
+
+.sport {
+  .cata-icon {
+    background-image: url("../../assets/icons/basketball.png");
+  }
+}
+.food {
+  .cata-icon {
+    background-image: url("../../assets/icons/food.png");
+  }
+}
+.game {
+  .cata-icon {
+    background-image: url("../../assets/icons/game.png");
+  }
+}

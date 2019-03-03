@@ -1,16 +1,16 @@
 import Taro, { Component } from "@tarojs/taro";
-import { View, Button } from "@tarojs/components";
-import { AtIcon, AtButton, AtMessage } from "taro-ui";
-import moment from 'moment';
+import { View, AtMessage, AtLoading } from "taro-ui";
+import moment from "moment";
 
 import "./index.css";
 import TimelineItem from "./item/timeline_item";
 import { fetchPubNotes } from "../../service/note_service";
-import { login, collect } from '../../service/user_service';
+import { login, collect } from "../../service/user_service";
+import { distinct } from "../../utils/Collections";
 
 class Index extends Component {
   config = {
-    navigationBarTitleText: "美食手记",
+    navigationBarTitleText: "手记",
     enablePullDownRefresh: true
   };
 
@@ -20,10 +20,10 @@ class Index extends Component {
     pageSize: 20,
     last: false,
     rawNotes: [],
-    notes: []
+    notes: Taro.getStorageSync("cache_data") || []
   };
 
-  handleFetchPubNotes(callback) {
+  handleFetchPubNotes({ pageNo, pageSize }, concatType = "override", callback) {
     if (this.state.loading) {
       return;
     }
@@ -31,26 +31,46 @@ class Index extends Component {
     this.setState({ loading: true });
     Taro.showNavigationBarLoading();
 
-    const { pageSize } = this.state;
-    fetchPubNotes({ pageNo: this.state.pageNo, pageSize })
-      .then((res) => {
-        const { content, last, pageNo } = res;
-        const rawNotes = this.state.pageNo === pageNo ? content : content.concat(this.state.rawNotes);
-        this.setState({
-          last, pageNo, rawNotes,
-          loading: false,
-          notes: this.buildNoteTimeLineData(rawNotes)
-        });
+    fetchPubNotes({ pageNo, pageSize })
+      .then(res => {
+        const { content, last } = res;
+        let rawNotes = [];
+        if (concatType === "append") {
+          rawNotes = distinct(
+            this.state.rawNotes.concat(content),
+            (e1, e2) => e1.id === e2.id
+          );
+        } else if (concatType === "unshift") {
+          rawNotes = distinct(
+            content.concat(this.state.rawNotes),
+            (e1, e2) => e1.id === e2.id
+          );
+        } else {
+          rawNotes = content;
+        }
+        this.setState(
+          {
+            last: this.state.last || last, // 如果 last 是 true 说明已经加载到最底部，则不再改变
+            pageNo: res.pageNo,
+            rawNotes,
+            loading: false,
+            notes: this.buildNoteTimeLineData(rawNotes)
+          },
+          () => {
+            // 缓存最新的 50 条数据
+            Taro.setStorageSync("cache_data", this.state.notes.slice(0, 30));
+          }
+        );
         Taro.hideNavigationBarLoading();
-        if (typeof callback === 'function') {
+        if (typeof callback === "function") {
           callback();
         }
       })
-      .catch((error) => {
+      .catch(error => {
         this.setState({ loading: false });
         console.error(error);
         Taro.hideNavigationBarLoading();
-        if (typeof callback === 'function') {
+        if (typeof callback === "function") {
           callback();
         }
         Taro.atMessage({ type: "error", message: "获取最新数据失败" });
@@ -58,45 +78,67 @@ class Index extends Component {
   }
 
   componentWillMount() {
+    const { pageNo, pageSize } = this.state;
     Taro.login()
       .then(res => login(res.code))
-      .then((res) => {
-        if (res.status >= 400) {
-          console.error(res.message);
-          Taro.atMessage({ type: 'error', message: '登录失败' });
+      .then(res => {
+        const { code } = res;
+        if (res.status >= 400 || code >= 400) {
+          // console.error(res.message);
+          // Taro.atMessage({ type: "error", message: "登录失败" });
+        } else {
+          const { token } = res;
+          if (token) {
+            Taro.setStorageSync("token", token);
+          }
         }
-        const { token } = res;
-        Taro.setStorageSync('token', token);
-        this.handleFetchPubNotes();
+        this.handleFetchPubNotes({ pageNo, pageSize }, "override");
       })
-      .catch((error) => {
+      .catch(error => {
         console.error(error);
-        Taro.atMessage({ type: 'error', message: '登录失败' });
+        Taro.atMessage({ type: "error", message: "登录失败" });
       });
   }
 
   onPullDownRefresh() {
-    this.handleFetchPubNotes(() => {
-      Taro.stopPullDownRefresh();
-    });
+    // 下拉刷新，获取最新的数据
+    this.handleFetchPubNotes(
+      { pageNo: 1, pageSize: this.state.pageSize },
+      "unshift",
+      () => {
+        Taro.stopPullDownRefresh();
+      }
+    );
+  }
+
+  onReachBottom() {
+    const { pageNo, pageSize, loading, last } = this.state;
+    if (loading || last) return;
+    this.handleFetchPubNotes({ pageNo: pageNo + 1, pageSize }, "append");
   }
 
   buildNoteTimeLineData(rawNotes) {
     const notes = [];
     const days = []; // set 集合
-    rawNotes.forEach((note) => {
-      const month = moment(note.publishTime).format('MMMM'); // 中文月份
-      const day = moment(note.publishTime).format('DD');
-      const key = moment(note.publishTime).format('YYYY-MM-DD');
+    rawNotes.forEach(note => {
+      const month = moment(note.publishTime).format("MMMM"); // 中文月份
+      const day = moment(note.publishTime).format("DD");
+      const key = moment(note.publishTime).format("YYYY-MM-DD");
       if (days.indexOf(key) < 0) {
         const dayNote = { key, month, day, notes: [], fixed: false };
         days.push(key);
         notes.push(dayNote);
       }
       const dayNote = notes.filter(n => n.key === key)[0];
-      const { id, content, images, publishTime, nickName, avatarUrl } = note;
+      const { id, content, images, publishTime, nickName, avatarUrl, pub } = note;
       dayNote.notes.push({
-        key: id, content, images, publishTime, nickName, avatarUrl
+        key: id,
+        content,
+        images,
+        publishTime,
+        nickName,
+        avatarUrl,
+        pub
       });
     });
     return notes;
@@ -105,44 +147,52 @@ class Index extends Component {
   handleNavigateRecord(event) {
     const { userInfo } = event.detail;
     if (!userInfo) {
-      Taro.atMessage({ type: 'warning', message: '请先同意授权获取微信用户信息' });
+      Taro.atMessage({
+        type: "warning",
+        message: "请先同意授权获取微信用户信息"
+      });
       return;
     }
     Taro.getUserInfo()
-      .then(res => collect({ nickName: res.userInfo.nickName, avatarUrl: res.userInfo.avatarUrl }))
+      .then(res =>
+        collect({
+          nickName: res.userInfo.nickName,
+          avatarUrl: res.userInfo.avatarUrl
+        })
+      )
       .then(() => {
         Taro.navigateTo({
           url: "/pages/record/record"
         });
       })
-      .catch((error) => { console.error(error); });
+      .catch(error => {
+        console.error(error);
+      });
   }
 
   render() {
-    const { notes } = this.state;
+    const { notes, last } = this.state;
     return (
-      <View style={{ marginBottom: "80rpx" }}>
+      <View style={{ marginBottom: "120rpx" }}>
         <AtMessage />
-        <View class="container nopadding" id="ssss">
+        <View class="container nopadding">
           <View class="timeline">
-            {notes && notes.map((note, index) => (
-              <TimelineItem
-                key={note.key}
-                body={note}
-                last={index === notes.length - 1}
-                fixed
-              />
-            ))}
+            {notes &&
+              notes.map((note, index) => (
+                <TimelineItem
+                  key={note.key}
+                  body={note}
+                  last={index === notes.length - 1}
+                  fixed
+                />
+              ))}
           </View>
+          {!last && (
+            <View style={{ textAlign: "center", marginTop: "30rpx" }}>
+              <AtLoading />
+            </View>
+          )}
         </View>
-        <AtButton
-          full
-          className="publish-btn"
-          openType="getUserInfo"
-          onGetUserInfo={this.handleNavigateRecord}
-        >
-          <AtIcon value="camera" size="25" color="#1da57a"></AtIcon>
-        </AtButton>
       </View>
     );
   }

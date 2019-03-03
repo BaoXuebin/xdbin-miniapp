@@ -1,5 +1,6 @@
 import Taro, { Component } from "@tarojs/taro";
 import { View, Text, Image } from "@tarojs/components";
+import { AtIcon } from "taro-ui";
 import monment from "moment";
 
 import "./timeline_item.scss";
@@ -17,14 +18,19 @@ class TimelineItem extends Component {
     const last = this.props.last;
     return (
       <View className="timeline-item">
-        {/* <View className="timeline-item-tail" />
-        <View className="timeline-item-head time-line-item-head-blue" /> */}
         {notes.map((note, idx) => (
           <View key={note.key} className="timeline-item-layout">
             {!(last && idx === notes.length - 1) && (
               <View className="timeline-item-tail" />
             )}
-            <View className="timeline-item-head time-line-item-head-blue" />
+            {note.pub ? (
+              <View className="timeline-item-head time-line-item-head-blue" />
+            ) : (
+              <View className="timeline-item-head timeline-item-head-custom time-line-item-head-blue">
+                <AtIcon value="lock" size="10" color="#1da57a" />
+              </View>
+            )}
+
             <View className="timeline-item-left">
               {idx === 0 && (
                 <View
@@ -40,20 +46,14 @@ class TimelineItem extends Component {
               )}
               <View className="timeline-item-left-2 ">
                 <View className="timeline-item-avatar">
-                  {/* <Image
-                    lazyLoad
-                    style={{ width: "100%", height: "100%" }}
-                    src="http://cdn.xdbin.com/pics/20181120000045"
-                    alt="头像"
-                  /> */}
                 </View>
               </View>
             </View>
             <View className="timeline-item-right">
               <View key={note.key} className="timeline-item-content">
                 <View>
-                  <View className="timeline-item-author">{note.nickName || 'Unknown'}</View>
-                  {note.content}
+                  {/* <View className="timeline-item-author">{note.nickName || 'Unknown'}</View> */}
+                  <View className="content">{note.content}</View>
                   <View className="content-container">
                     {note.images && note.images.length > 0 && (
                       <View>

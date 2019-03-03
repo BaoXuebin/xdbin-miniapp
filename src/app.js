@@ -7,6 +7,7 @@ import 'moment/locale/zh-cn'
 import Index from './pages/index'
 import Record from './pages/record/record'
 import Welcome from './pages/welcome/welcome'
+import DailyTodo from './pages/todo/daily'
 
 import configStore from './store'
 
@@ -22,13 +23,40 @@ class App extends Component {
     pages: [
       // 'pages/welcome/welcome',
       'pages/index/index',
-      'pages/record/record'
+      'pages/record/record',
+      'pages/todo/daily',
     ],
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#fff',
       navigationBarTitleText: 'WeChat',
       navigationBarTextStyle: 'black'
+    },
+    tabBar: {
+      color: "black",
+      selectedColor: "black",
+      backgroundColor: "#white",
+      borderStyle: "black",
+      list: [
+        {
+          pagePath: "pages/index/index",
+          text: "手记",
+          iconPath: "./assets/icons/note.png",
+          selectedIconPath: "./assets/icons/note_focus.png"
+        },
+        {
+          pagePath: "pages/record/record",
+          text: "添加",
+          iconPath: "./assets/icons/add.png",
+          selectedIconPath: "./assets/icons/add_focus.png"
+        },
+        {
+          pagePath: "pages/todo/daily",
+          text: "待办",
+          iconPath: "./assets/icons/todo.png",
+          selectedIconPath: "./assets/icons/todo_focus.png"
+        }
+      ]
     }
   }
 
@@ -50,6 +78,7 @@ class App extends Component {
         <Welcome />
         <Index />
         <Record />
+        <DailyTodo />
       </Provider>
     )
   }
